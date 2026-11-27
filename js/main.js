@@ -50,7 +50,8 @@
     current = (i + TRACKS.length) % TRACKS.length;
     const t = TRACKS[current];
     usingPreview = !t.full;
-    cancelRamp();
+    stopTape();
+    decoded = null;
     audio.src = t.full || t.preview;
     audio.playbackRate = 1;
     renderNowPlaying();
@@ -69,15 +70,67 @@
     }
   });
 
-  /* --- turntable feel: pause = platter brake, resume = spin-up --- */
-  let rampId = 0, braking = false;
-  function cancelRamp() { cancelAnimationFrame(rampId); braking = false; }
+  /* =====================================================================
+     TURNTABLE: pause = platter brake, resume = spin-up.
+     Browsers handle <audio>.playbackRate unreliably (Safari/iOS ignore or
+     mute slow rates), so once a track is playing we decode a copy into Web
+     Audio in the background. On pause, the sound hands over to that copy,
+     whose speed AND pitch can be bent sample-accurately everywhere.
+     If the copy isn't ready yet, fall back to the element's playbackRate.
+     ===================================================================== */
+  const BRAKE_S = 1.0, SPINUP_S = 0.55;
+  const curve = (fn, n = 128) => Float32Array.from({ length: n }, (_, i) => fn(i / (n - 1)));
+  const BRAKE = curve(k => Math.max(0.0005, Math.pow(1 - k, 1.4)));             // platter drags, then dies
+  const SPINUP = curve(k => 0.08 + 0.92 * k * k * (3 - 2 * k));                 // motor catches, locks to speed
+  const avg = c => c.reduce((a, b) => a + b, 0) / c.length;
+
+  let decoded = null, decodedSrc = '', decodeCtl = null;
+  let tape = null, brakeTimer = 0, rampId = 0, braking = false;
+
+  function prepareTape() {
+    const src = audio.src;
+    if (!actx || !src || decodedSrc === src || reduceMotion) return;
+    decodedSrc = src; decoded = null;
+    if (decodeCtl) decodeCtl.abort();
+    const ctl = decodeCtl = new AbortController();
+    fetch(src, { signal: ctl.signal })
+      .then(r => { if (!r.ok) throw new Error(r.status); return r.arrayBuffer(); })
+      .then(ab => new Promise((res, rej) => actx.decodeAudioData(ab, res, rej)))
+      .then(buf => { if (decodedSrc === src) decoded = buf; })
+      .catch(() => { if (decodedSrc === src) decodedSrc = ''; });
+  }
+  audio.addEventListener('playing', prepareTape);
+  const tapeReady = () => decoded && decodedSrc === audio.src;
+
+  function setGain(v) {
+    if (!musicGain) return;
+    const n = actx.currentTime;
+    musicGain.gain.cancelScheduledValues(n);
+    musicGain.gain.setValueAtTime(v, n);
+  }
+  function stopTape() {
+    clearTimeout(brakeTimer);
+    cancelAnimationFrame(rampId);
+    if (tape) { try { tape.src.stop(); } catch (_) {} tape = null; }
+    if (braking) { braking = false; document.body.classList.remove('is-braking'); }
+  }
+  // play the decoded copy from `offset`, its speed following `shape` for `dur` s
+  function runTape(offset, when, shape, dur) {
+    const src = actx.createBufferSource();
+    src.buffer = decoded;
+    const g = actx.createGain();
+    src.connect(g).connect(analyser);
+    src.playbackRate.setValueCurveAtTime(shape, when, dur);
+    src.start(when, Math.max(0, Math.min(offset, decoded.duration - 0.05)));
+    return (tape = { src, g });
+  }
+
+  // element-only fallback ramp
   function ramp(from, to, ms, done) {
     cancelAnimationFrame(rampId);
     const s = performance.now();
     const step = n => {
       const k = Math.min(1, (n - s) / ms);
-      // brake: ease-in (the platter drags, then dies); spin-up: smoothstep
       const e = to < from ? k * k : k * k * (3 - 2 * k);
       audio.playbackRate = Math.max(0.0625, from + (to - from) * e);
       if (k < 1) rampId = requestAnimationFrame(step); else if (done) done();
@@ -87,27 +140,76 @@
 
   function play(spinUp = true) {
     ensureAudioGraph();
-    const resume = spinUp && !reduceMotion && audio.currentTime > 0.5;
+    stopTape();
+    const resume = spinUp && !reduceMotion && actx && audio.currentTime > 0.5;
+
+    if (resume && tapeReady()) {
+      // start the record silently, then spin the tape up so it lands exactly
+      // where the record is when the motor reaches speed, and crossfade.
+      setGain(0);
+      const p = audio.play();
+      (p || Promise.resolve()).then(() => {
+        const ts = actx.currentTime + 0.01;
+        const E = audio.currentTime;
+        const t = runTape(E + SPINUP_S * (1 - avg(SPINUP)), ts, SPINUP, SPINUP_S);
+        const hand = ts + SPINUP_S;
+        t.g.gain.setValueAtTime(1, hand);
+        t.g.gain.linearRampToValueAtTime(0, hand + 0.05);
+        t.src.stop(hand + 0.1);
+        musicGain.gain.setValueAtTime(0, hand);
+        musicGain.gain.linearRampToValueAtTime(1, hand + 0.05);
+      }).catch(() => setGain(1));
+      return;
+    }
+
+    setGain(1);
     if (resume) audio.playbackRate = 0.3;
     const p = audio.play();
     if (p && p.catch) p.catch(() => {});
     if (resume) ramp(0.3, 1, 420);
   }
+
   function pause() {
-    if (audio.paused) return;
+    if (audio.paused || braking) return;
     if (reduceMotion || !actx) return audio.pause();
     braking = true;
     document.body.classList.add('is-braking');
+
+    if (tapeReady()) {
+      const ts = actx.currentTime + 0.01;
+      const t = runTape(audio.currentTime + 0.01, ts, BRAKE, BRAKE_S);
+      t.g.gain.setValueAtTime(1, ts + BRAKE_S * 0.6);
+      t.g.gain.linearRampToValueAtTime(0, ts + BRAKE_S);
+      t.src.stop(ts + BRAKE_S + 0.05);
+      // hand over: mute the record the instant the tape takes it, then stop it
+      musicGain.gain.cancelScheduledValues(actx.currentTime);
+      musicGain.gain.setValueAtTime(1, ts);
+      musicGain.gain.linearRampToValueAtTime(0, ts + 0.012);
+      setTimeout(() => { if (braking) audio.pause(); }, 40);
+      brakeTimer = setTimeout(() => {
+        tape = null;
+        braking = false;
+        document.body.classList.remove('is-braking');
+        setGain(1);
+        syncPlaying();
+      }, BRAKE_S * 1000 + 80);
+      return;
+    }
+
     ramp(audio.playbackRate, 0.07, 750, () => {
       audio.pause();
       audio.playbackRate = 1;
       braking = false;
       document.body.classList.remove('is-braking');
+      syncPlaying();
     });
   }
+
   function toggle() {
     if (!audio.src) return load(current, true, false);
-    if (braking) { // changed your mind mid-brake: catch the platter
+    if (braking) {
+      // changed your mind mid-brake: catch the platter and spin back up
+      if (tape) return play(true);
       braking = false;
       document.body.classList.remove('is-braking');
       return ramp(audio.playbackRate, 1, 300);
@@ -123,7 +225,7 @@
   audio.addEventListener('timeupdate', renderProgress);
 
   function syncPlaying() {
-    const on = !audio.paused;
+    const on = !audio.paused || braking;
     document.body.classList.toggle('is-playing', on);
     $('#deck-play').setAttribute('aria-label', on ? 'Pause' : 'Play');
     $('#hero-play').setAttribute('aria-label', on ? 'Pause' : 'Play');
@@ -473,7 +575,7 @@
   const band = (a, b) => { let s = 0; for (let i = a; i < b; i++) s += freq[i]; return s / ((b - a) * 255); };
 
   function analyse(now) {
-    const live = analyser && !audio.paused;
+    const live = analyser && (!audio.paused || braking);
     if (live) {
       analyser.getByteFrequencyData(freq);
       analyser.getByteTimeDomainData(wave);

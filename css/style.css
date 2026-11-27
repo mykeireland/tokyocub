@@ -165,7 +165,7 @@ button { font: inherit; color: inherit; background: none; border: 0; cursor: poi
 .hero__content { position: relative; z-index: 3; max-width: 820px; padding-left: clamp(20px, 4vw, 60px); }
 
 .eyebrow { display: flex; align-items: center; gap: 14px; margin: 0 0 22px; font-size: 13px; font-weight: 700; letter-spacing: .26em; text-transform: uppercase; color: var(--washi-dim); }
-.eyebrow__line { width: 44px; height: 2px; background: var(--shu); transform-origin: left; transform: scaleX(calc(.6 + var(--bass) * 1.2)); }
+.eyebrow__line { width: 44px; height: 2px; background: var(--shu); transform-origin: left; transform: scaleX(calc(.45 + var(--bass) * .55)); }
 
 /* The repeated-word stack echoes the FIRE / MUNCHIES cover typography */
 .stack { position: relative; margin: 0; display: grid; font: 400 clamp(64px, 12.5vw, 196px)/.82 var(--display); letter-spacing: .005em; }
@@ -481,6 +481,7 @@ button { font: inherit; color: inherit; background: none; border: 0; cursor: poi
   .nav__links a { font: 400 44px/1 var(--display); letter-spacing: .02em; color: var(--washi); }
   .nav__links a i { font-size: 26px; }
   .hero { align-items: flex-end; }
+  .hero__photo img { object-position: 74% 22%; }
   .hero__photo { width: 100%; opacity: .55; -webkit-mask-image: linear-gradient(180deg, #000 30%, transparent 85%); mask-image: linear-gradient(180deg, #000 30%, transparent 85%); }
   .hero__vertical { display: none; }
   .hero__content { padding-left: 0; }

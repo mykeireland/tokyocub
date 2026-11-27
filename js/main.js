@@ -526,13 +526,14 @@
      ===================================================================== */
   const cv = $('#viz'), cx = cv.getContext('2d');
   const sp = $('#deck-spectrum'), sx = sp.getContext('2d');
-  let W = 0, H = 0, DPR = 1, SW = 0, SH = 0;
+  let W = 0, H = 0, DPR = 1, SW = 0, SH = 0, contentTop = Infinity;
 
   function resize() {
     DPR = Math.min(2, devicePixelRatio || 1);
     W = cv.clientWidth; H = cv.clientHeight;
     cv.width = W * DPR; cv.height = H * DPR;
     cx.setTransform(DPR, 0, 0, DPR, 0, 0);
+    contentTop = $('.hero__content').offsetTop;
     SW = sp.clientWidth; SH = sp.clientHeight;
     sp.width = SW * DPR; sp.height = SH * DPR;
     sx.setTransform(DPR, 0, 0, DPR, 0, 0);
@@ -609,9 +610,11 @@
     cx.globalCompositeOperation = 'source-over';
 
     const mobile = W < 860;
-    const ox = mobile ? W * .5 : W * .66;
-    const oy = mobile ? H * .22 : H * .47;
-    const R = Math.min(W, H) * (mobile ? .24 : .27);
+    // phone/tablet: Toni stands left of centre, the sun rises behind him to
+    // the upper right and bleeds off the edge (mirrors the desktop framing)
+    const R = mobile ? Math.min(W * .25, H * .14) : Math.min(W, H) * .27;
+    const ox = mobile ? W * (W > 600 ? .75 : .7) : W * .66;
+    const oy = mobile ? H * .19 : H * .47;
     enso.x = ox; enso.y = oy; enso.r = R;
 
     // vermilion sun
@@ -681,7 +684,7 @@
     }
 
     // waveform cut across the lower hero
-    const wy = mobile ? oy + R * 1.75 : H * .86;
+    const wy = mobile ? Math.min(oy + R * 2.05, contentTop - 34) : H * .86;
     cx.strokeStyle = `rgba(241,234,220,${live ? .5 : .18})`;
     cx.lineWidth = 1.2;
     cx.beginPath();

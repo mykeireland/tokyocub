@@ -525,3 +525,69 @@ button { font: inherit; color: inherit; background: none; border: 0; cursor: poi
   .reveal { opacity: 1; transform: none; }
   .grain { display: none; }
 }
+
+/* =====================================================================
+   SPECIAL SAUCE
+   ===================================================================== */
+
+/* section numbers: kanji as a red stamp mark, not a dash */
+.section__num i { font: normal 800 16px/1 var(--mincho); color: var(--shu); letter-spacing: 0; margin-right: 10px; }
+
+/* 居合 — the katana cut. A blade of light that slices across the screen. */
+.cut {
+  position: fixed; left: -10vw; top: 50%; width: 120vw; height: 2px; margin-top: -1px;
+  z-index: 110; pointer-events: none;
+  background: linear-gradient(90deg, transparent 0%, rgba(255,255,255,.2) 8%, #fff 45%, #ffd9cf 55%, var(--shu-hot) 80%, transparent 100%);
+  box-shadow: 0 0 14px 2px rgba(255, 120, 90, .75), 0 0 60px 6px rgba(215, 50, 42, .35);
+  transform: rotate(var(--ang, -8deg));
+  clip-path: inset(0 100% 0 0);
+  animation: cut var(--dur, .5s) cubic-bezier(.75, 0, .15, 1) forwards;
+}
+.cut--soft { height: 1px; opacity: .8; }
+@keyframes cut {
+  0%   { clip-path: inset(0 100% 0 0); opacity: 1; }
+  55%  { clip-path: inset(0 0 0 0); opacity: 1; }
+  100% { clip-path: inset(0 0 0 100%); opacity: 0; }
+}
+
+/* the gate, split in two along the cut */
+.gate--half { pointer-events: none; transition: none; }
+.gate--half * { animation: none !important; opacity: 1 !important; }
+.gate--half .gate__enso path { stroke-dashoffset: 0; }
+.gate--a { clip-path: polygon(0 0, 100% 0, 100% 40%, 0 60%); }
+.gate--b { clip-path: polygon(0 60%, 100% 40%, 100% 100%, 0 100%); }
+.gate--half.is-cut { transition: transform 1.25s cubic-bezier(.6, 0, .1, 1) .28s, opacity 1s ease .55s, filter 1s ease .3s; opacity: 0; filter: blur(2px); }
+.gate--a.is-cut { transform: translate(-3vw, -14vh) rotate(-2.5deg); }
+.gate--b.is-cut { transform: translate(3vw, 14vh) rotate(2.5deg); }
+
+/* hit the sun to play / stop */
+.hero.is-over-enso { cursor: pointer; }
+
+/* tracklist: hovering a number turns it red, ready to fire */
+.track:hover .track__num { color: var(--shu); }
+.track:hover .track__art { transform: scale(1.06) rotate(-2deg); }
+.track__art { transition: transform .4s var(--ease); }
+
+/* footer back-to-top */
+.footer__top { text-decoration: none; font-weight: 700; border-bottom: 1px solid rgba(241,234,220,.5); padding-bottom: 3px; }
+.footer__top:hover { border-color: var(--washi); }
+
+/* "now playing" hanko stamp that lands on a track change */
+.stamp {
+  position: fixed; z-index: 70; right: var(--gutter); bottom: calc(var(--deck-h) + 50px);
+  display: grid; place-items: center; width: 88px; height: 88px; border-radius: 6px;
+  background: var(--shu); color: var(--washi); pointer-events: none;
+  font: 800 44px/1 var(--mincho);
+  box-shadow: 0 16px 40px rgba(0,0,0,.5);
+  animation: stamp 1.6s var(--ease) forwards;
+}
+.stamp small { position: absolute; bottom: -22px; left: 50%; transform: translateX(-50%); white-space: nowrap; font: 700 10px/1 var(--body); letter-spacing: .22em; text-transform: uppercase; color: var(--washi); }
+@keyframes stamp {
+  0%   { opacity: 0; transform: scale(2.2) rotate(-14deg); }
+  14%  { opacity: 1; transform: scale(.94) rotate(-6deg); }
+  22%  { transform: scale(1) rotate(-6deg); }
+  78%  { opacity: 1; transform: scale(1) rotate(-6deg); }
+  100% { opacity: 0; transform: scale(.9) rotate(-6deg) translateY(10px); }
+}
+@media (max-width: 620px) { .stamp { width: 66px; height: 66px; font-size: 32px; right: 16px; } }
+@media (prefers-reduced-motion: reduce) { .cut, .stamp { display: none; } }

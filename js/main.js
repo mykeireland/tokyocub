@@ -20,7 +20,10 @@
   audio.crossOrigin = 'anonymous';
   audio.preload = 'metadata';
 
-  let actx = null, analyser = null, freq = null, wave = null;
+  // Let the pitch fall with the speed: a real turntable brake, not a time-stretch.
+  audio.preservesPitch = audio.mozPreservesPitch = audio.webkitPreservesPitch = false;
+
+  let actx = null, analyser = null, freq = null, wave = null, musicGain = null;
   let current = Math.max(0, TRACKS.findIndex(t => t.start));
   let usingPreview = false;
 
@@ -30,10 +33,12 @@
       if (!AC) return;
       actx = new AC();
       const src = actx.createMediaElementSource(audio);
+      musicGain = actx.createGain();
       analyser = actx.createAnalyser();
       analyser.fftSize = 2048;
       analyser.smoothingTimeConstant = 0.8;
-      src.connect(analyser);
+      src.connect(musicGain);
+      musicGain.connect(analyser);
       analyser.connect(actx.destination);
       freq = new Uint8Array(analyser.frequencyBinCount);
       wave = new Uint8Array(analyser.fftSize);
@@ -41,13 +46,16 @@
     if (actx.state === 'suspended') actx.resume();
   }
 
-  function load(i, autoplay = true) {
+  function load(i, autoplay = true, fx = true) {
     current = (i + TRACKS.length) % TRACKS.length;
     const t = TRACKS[current];
     usingPreview = !t.full;
+    cancelRamp();
     audio.src = t.full || t.preview;
+    audio.playbackRate = 1;
     renderNowPlaying();
-    if (autoplay) play();
+    if (fx) { slash({ soft: true }); stamp(current); }
+    if (autoplay) play(false);
   }
 
   // If a full master fails (codec, network, link rot) fall back to the preview.
@@ -61,14 +69,50 @@
     }
   });
 
-  function play() {
+  /* --- turntable feel: pause = platter brake, resume = spin-up --- */
+  let rampId = 0, braking = false;
+  function cancelRamp() { cancelAnimationFrame(rampId); braking = false; }
+  function ramp(from, to, ms, done) {
+    cancelAnimationFrame(rampId);
+    const s = performance.now();
+    const step = n => {
+      const k = Math.min(1, (n - s) / ms);
+      // brake: ease-in (the platter drags, then dies); spin-up: smoothstep
+      const e = to < from ? k * k : k * k * (3 - 2 * k);
+      audio.playbackRate = Math.max(0.0625, from + (to - from) * e);
+      if (k < 1) rampId = requestAnimationFrame(step); else if (done) done();
+    };
+    rampId = requestAnimationFrame(step);
+  }
+
+  function play(spinUp = true) {
     ensureAudioGraph();
+    const resume = spinUp && !reduceMotion && audio.currentTime > 0.5;
+    if (resume) audio.playbackRate = 0.3;
     const p = audio.play();
     if (p && p.catch) p.catch(() => {});
+    if (resume) ramp(0.3, 1, 420);
+  }
+  function pause() {
+    if (audio.paused) return;
+    if (reduceMotion || !actx) return audio.pause();
+    braking = true;
+    document.body.classList.add('is-braking');
+    ramp(audio.playbackRate, 0.07, 750, () => {
+      audio.pause();
+      audio.playbackRate = 1;
+      braking = false;
+      document.body.classList.remove('is-braking');
+    });
   }
   function toggle() {
-    if (!audio.src) return load(current);
-    audio.paused ? play() : audio.pause();
+    if (!audio.src) return load(current, true, false);
+    if (braking) { // changed your mind mid-brake: catch the platter
+      braking = false;
+      document.body.classList.remove('is-braking');
+      return ramp(audio.playbackRate, 1, 300);
+    }
+    audio.paused ? play() : pause();
   }
   const next = () => load(current + 1);
   const prev = () => (audio.currentTime > 4 ? (audio.currentTime = 0) : load(current - 1));
@@ -84,6 +128,8 @@
     $('#deck-play').setAttribute('aria-label', on ? 'Pause' : 'Play');
     $('#hero-play').setAttribute('aria-label', on ? 'Pause' : 'Play');
     $('#hero-now-label').textContent = on ? 'Now playing' : 'Paused';
+    const t = TRACKS[current];
+    document.title = on ? `▶ ${t.title} — TOKYO CUB` : 'TOKYO CUB — Toni Lozanovski';
     if ('mediaSession' in navigator) navigator.mediaSession.playbackState = on ? 'playing' : 'paused';
   }
 
@@ -222,19 +268,122 @@
   });
   if ('mediaSession' in navigator) {
     navigator.mediaSession.setActionHandler('play', play);
-    navigator.mediaSession.setActionHandler('pause', () => audio.pause());
+    navigator.mediaSession.setActionHandler('pause', pause);
     navigator.mediaSession.setActionHandler('nexttrack', next);
     navigator.mediaSession.setActionHandler('previoustrack', prev);
   }
 
+  /* ---------------- 居合 THE CUT ---------------- */
+  // A blade of light across the screen. Default angle passes through the
+  // centre from 60% (left) to 40% (right) — the line the gate splits on.
+  function slash({ soft = false, ang } = {}) {
+    if (reduceMotion) return;
+    const el = document.createElement('div');
+    el.className = 'cut' + (soft ? ' cut--soft' : '');
+    const a = ang ?? (Math.atan2(-0.2 * innerHeight, innerWidth) * 180) / Math.PI + (soft ? (Math.random() * 10 - 5) : 0);
+    el.style.setProperty('--ang', a + 'deg');
+    el.style.setProperty('--dur', soft ? '.45s' : '.55s');
+    document.body.appendChild(el);
+    setTimeout(() => el.remove(), 900);
+  }
+
+  // Hanko stamp with the track number in kanji
+  function stamp(i) {
+    if (reduceMotion || document.body.classList.contains('is-gated')) return;
+    document.querySelectorAll('.stamp').forEach(s => s.remove());
+    const el = document.createElement('div');
+    el.className = 'stamp';
+    el.setAttribute('aria-hidden', 'true');
+    el.innerHTML = `${KANJI_NUM[i] || i + 1}<small>${TRACKS[i].title}</small>`;
+    document.body.appendChild(el);
+    setTimeout(() => el.remove(), 1700);
+  }
+
+  // The sound of a blade leaving its saya, synthesised live — no samples.
+  // Routed into the analyser so the ensō flares with the steel.
+  function katana() {
+    if (!actx) return;
+    const t = actx.currentTime + 0.02;
+    const out = actx.createGain();
+    out.gain.value = 0.55;
+    out.connect(analyser);
+
+    // swoosh: band-passed noise sweeping upward
+    const len = Math.floor(actx.sampleRate * 0.7);
+    const buf = actx.createBuffer(1, len, actx.sampleRate);
+    const d = buf.getChannelData(0);
+    for (let i = 0; i < len; i++) d[i] = Math.random() * 2 - 1;
+    const noise = actx.createBufferSource();
+    noise.buffer = buf;
+    const bp = actx.createBiquadFilter();
+    bp.type = 'bandpass'; bp.Q.value = 1.4;
+    bp.frequency.setValueAtTime(500, t);
+    bp.frequency.exponentialRampToValueAtTime(7500, t + 0.3);
+    const ng = actx.createGain();
+    ng.gain.setValueAtTime(0.0001, t);
+    ng.gain.exponentialRampToValueAtTime(0.9, t + 0.14);
+    ng.gain.exponentialRampToValueAtTime(0.0001, t + 0.5);
+    noise.connect(bp).connect(ng).connect(out);
+    noise.start(t); noise.stop(t + 0.7);
+
+    // ring: inharmonic partials, like struck steel
+    const base = 1180;
+    [1, 2.76, 5.4, 8.93].forEach((r, k) => {
+      const o = actx.createOscillator();
+      o.type = 'sine';
+      o.frequency.setValueAtTime(base * r * 1.012, t + 0.16);
+      o.frequency.exponentialRampToValueAtTime(base * r, t + 0.5);
+      const g = actx.createGain();
+      g.gain.setValueAtTime(0.0001, t + 0.16);
+      g.gain.exponentialRampToValueAtTime(0.11 / (k + 1), t + 0.19);
+      g.gain.exponentialRampToValueAtTime(0.0001, t + 1.9 - k * 0.3);
+      const pan = actx.createStereoPanner ? actx.createStereoPanner() : null;
+      if (pan) { pan.pan.setValueAtTime(-0.6, t); pan.pan.linearRampToValueAtTime(0.6, t + 0.35); o.connect(g).connect(pan).connect(out); }
+      else o.connect(g).connect(out);
+      o.start(t + 0.16); o.stop(t + 2);
+    });
+  }
+
   /* ---------------- GATE ---------------- */
   function enter(withSound) {
-    $('#gate').classList.add('is-gone');
+    const gate = $('#gate');
     document.body.classList.remove('is-gated');
     $('#deck').classList.add('is-up');
-    if (withSound) load(current, true);
-    else { load(current, false); }
-    setTimeout(() => $('#gate').remove(), 1400);
+
+    if (withSound) {
+      ensureAudioGraph();
+      // start the record inside the click (autoplay rules), silently,
+      // let the blade sing, then bring the music up underneath it
+      load(current, true, false);
+      if (musicGain) {
+        const t = actx.currentTime;
+        musicGain.gain.setValueAtTime(0, t);
+        musicGain.gain.setValueAtTime(0, t + 0.55);
+        musicGain.gain.linearRampToValueAtTime(1, t + 1.3);
+        katana();
+      }
+    } else {
+      load(current, false, false);
+    }
+
+    if (reduceMotion) {
+      gate.classList.add('is-gone');
+      return setTimeout(() => gate.remove(), 1200);
+    }
+    // split the gate in two along the cut
+    const halves = ['a', 'b'].map(k => {
+      const h = gate.cloneNode(true);
+      h.removeAttribute('id');
+      h.querySelectorAll('[id]').forEach(n => n.removeAttribute('id'));
+      h.setAttribute('aria-hidden', 'true');
+      h.classList.add('gate--half', 'gate--' + k);
+      document.body.appendChild(h);
+      return h;
+    });
+    gate.remove();
+    slash();
+    requestAnimationFrame(() => requestAnimationFrame(() => halves.forEach(h => h.classList.add('is-cut'))));
+    setTimeout(() => halves.forEach(h => h.remove()), 1900);
   }
   $('#enter-sound').addEventListener('click', () => enter(true));
   $('#enter-silent').addEventListener('click', () => enter(false));
@@ -302,6 +451,21 @@
   }
   const rings = [];
 
+  // Strike the ensō: the sun itself is a play button.
+  const enso = { x: 0, y: 0, r: 0 };
+  const hero = $('#top');
+  const overEnso = e => {
+    if (e.target.closest('a, button, .hero__content')) return false;
+    const b = cv.getBoundingClientRect();
+    return Math.hypot(e.clientX - b.left - enso.x, e.clientY - b.top - enso.y) < enso.r * 1.1;
+  };
+  hero.addEventListener('pointermove', e => hero.classList.toggle('is-over-enso', overEnso(e)));
+  hero.addEventListener('click', e => {
+    if (!overEnso(e)) return;
+    if (!reduceMotion) rings.push({ r: 0, a: 1 }, { r: -40, a: .7 });
+    toggle();
+  });
+
   let bass = 0, mid = 0, treble = 0, energy = 0, beat = 0;
   let bassAvg = 0, lastBeat = 0, heroVisible = true, t0 = performance.now();
   new IntersectionObserver(([en]) => (heroVisible = en.isIntersecting)).observe($('#top'));
@@ -346,6 +510,7 @@
     const ox = mobile ? W * .5 : W * .66;
     const oy = mobile ? H * .22 : H * .47;
     const R = Math.min(W, H) * (mobile ? .24 : .27);
+    enso.x = ox; enso.y = oy; enso.r = R;
 
     // vermilion sun
     const sunR = R * (.62 + bass * .1);

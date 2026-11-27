@@ -1,0 +1,352 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>TOKYO CUB — Toni Lozanovski</title>
+  <meta name="description" content="Tokyo Cub is Toni Lozanovski — a Naarm/Melbourne producer working at the edge of alt hip hop, electronica and dark pop. Listen now.">
+  <meta name="theme-color" content="#0b0a09">
+  <meta property="og:title" content="TOKYO CUB">
+  <meta property="og:description" content="Naarm/Melbourne producer. Alt hip hop, electronica, dark pop. Press play.">
+  <meta property="og:image" content="assets/img/tokyo-cub-press.jpg">
+  <meta property="og:type" content="music.musician">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='8' fill='%23d7322a'/%3E%3Ctext x='32' y='45' font-size='38' text-anchor='middle' fill='%23f1eadc' font-family='serif'%3E熊%3C/text%3E%3C/svg%3E">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Anton&family=Shippori+Mincho+B1:wght@500;800&family=Manrope:wght@400;500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body class="is-gated">
+
+  <!-- ===================== GATE ===================== -->
+  <div class="gate" id="gate" role="dialog" aria-modal="true" aria-labelledby="gate-title">
+    <div class="gate__inner">
+      <svg class="gate__enso" viewBox="0 0 200 200" aria-hidden="true">
+        <path d="M100 18 C 150 16, 184 55, 182 102 C 180 150, 142 184, 98 182 C 52 180, 18 146, 20 98 C 22 62, 44 36, 76 24"
+              fill="none" stroke="currentColor" stroke-width="9" stroke-linecap="round"/>
+      </svg>
+      <div class="gate__seal" aria-hidden="true"><span>東京</span><span>子熊</span></div>
+      <h1 class="gate__title" id="gate-title">TOKYO CUB</h1>
+      <p class="gate__sub">This site is a record. It is meant to be heard.</p>
+      <div class="gate__actions">
+        <button class="btn btn--primary" id="enter-sound">
+          <span class="btn__dot"></span> Enter with sound
+        </button>
+        <button class="btn btn--ghost" id="enter-silent">Enter in silence</button>
+      </div>
+      <p class="gate__hint">Headphones recommended · 音</p>
+    </div>
+  </div>
+
+  <!-- ===================== NAV ===================== -->
+  <header class="nav" id="nav">
+    <a class="nav__seal" href="#top" aria-label="Tokyo Cub — home">
+      <span aria-hidden="true">熊</span>
+    </a>
+    <nav class="nav__links" aria-label="Sections">
+      <a href="#sound"><i>音</i>Sound</a>
+      <a href="#vision"><i>映</i>Vision</a>
+      <a href="#way"><i>道</i>The Way</a>
+      <a href="#sensei"><i>師</i>Teaching</a>
+      <a href="#lineage"><i>系</i>Lineage</a>
+      <a href="#connect"><i>繋</i>Connect</a>
+    </nav>
+    <button class="nav__toggle" id="nav-toggle" aria-expanded="false" aria-controls="nav">
+      <span></span><span></span><span class="sr-only">Menu</span>
+    </button>
+  </header>
+
+  <main>
+    <!-- ===================== HERO ===================== -->
+    <section class="hero" id="top" aria-label="Tokyo Cub">
+      <canvas class="hero__canvas" id="viz" aria-hidden="true"></canvas>
+      <div class="hero__photo" aria-hidden="true">
+        <img src="assets/img/tokyo-cub-press.jpg" alt="">
+      </div>
+      <div class="hero__vertical" aria-hidden="true">東京子熊</div>
+
+      <div class="hero__content">
+        <p class="eyebrow"><span class="eyebrow__line"></span>Naarm / Melbourne · Producer</p>
+        <h2 class="stack" aria-label="Tokyo Cub">
+          <span class="stack__ghost" aria-hidden="true">TOKYO CUB</span>
+          <span class="stack__ghost" aria-hidden="true">TOKYO CUB</span>
+          <span class="stack__ghost" aria-hidden="true">TOKYO CUB</span>
+          <span class="stack__solid">TOKYO CUB</span>
+        </h2>
+        <p class="hero__lede">Atmospheric sound design over heavy rhythmic foundations — alt hip hop, electronica and dark pop, cut with a single clean stroke.</p>
+        <div class="hero__cta">
+          <button class="playbig" id="hero-play" aria-label="Play">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path class="i-play" d="M8 5v14l11-7z"/><path class="i-pause" d="M7 5h4v14H7zM13 5h4v14h-4z"/></svg>
+          </button>
+          <div class="hero__now">
+            <span class="hero__now-label" id="hero-now-label">Press play</span>
+            <span class="hero__now-title" id="hero-now-title">MUNCHIES</span>
+          </div>
+        </div>
+      </div>
+
+      <a class="hero__scroll" href="#sound" aria-label="Scroll to music">
+        <span>Scroll</span><i></i>
+      </a>
+    </section>
+
+    <!-- ===================== SOUND ===================== -->
+    <section class="section sound" id="sound">
+      <div class="kanji-bg" aria-hidden="true">音</div>
+      <header class="section__head reveal">
+        <span class="section__kanji">音</span>
+        <div>
+          <p class="section__num">一 / Sound</p>
+          <h2 class="section__title">The Catalogue</h2>
+        </div>
+      </header>
+
+      <div class="sound__grid">
+        <!-- Now spinning -->
+        <article class="spin reveal" aria-live="polite">
+          <div class="spin__stage">
+            <div class="spin__disc" id="spin-disc" aria-hidden="true">
+              <div class="spin__label"><img id="spin-label" src="assets/img/munchies.jpg" alt=""></div>
+            </div>
+            <img class="spin__art" id="spin-art" src="assets/img/munchies.jpg" alt="Cover art">
+          </div>
+          <div class="spin__meta">
+            <span class="badge" id="spin-badge">Full master</span>
+            <h3 class="spin__title" id="spin-title">MUNCHIES</h3>
+            <p class="spin__artists" id="spin-artists">Tokyo Cub, Lost Kid &amp; WE LOST TOKYO</p>
+            <p class="spin__date" id="spin-date">Released 30 October 2026</p>
+            <div class="spin__links" id="spin-links"></div>
+          </div>
+        </article>
+
+        <!-- Tracklist -->
+        <ol class="tracklist reveal" id="tracklist" aria-label="Tracklist"></ol>
+      </div>
+
+      <div class="sound__more reveal">
+        <p>Full discography, every collaboration and the newest drops live on Spotify.</p>
+        <a class="textlink" href="https://open.spotify.com/artist/7ps759iwP09Xb5Hks9glI4" target="_blank" rel="noopener">Follow Tokyo Cub on Spotify <span aria-hidden="true">→</span></a>
+      </div>
+    </section>
+
+    <!-- ===================== VISION ===================== -->
+    <section class="section vision" id="vision">
+      <div class="kanji-bg" aria-hidden="true">映</div>
+      <header class="section__head reveal">
+        <span class="section__kanji">映</span>
+        <div>
+          <p class="section__num">二 / Vision</p>
+          <h2 class="section__title">Moving Pictures</h2>
+        </div>
+      </header>
+      <div class="reel" id="reel"></div>
+      <div class="sound__more reveal">
+        <a class="textlink" href="https://www.youtube.com/@Tokyo_Cub" target="_blank" rel="noopener">Subscribe on YouTube <span aria-hidden="true">→</span></a>
+      </div>
+    </section>
+
+    <!-- ===================== THE WAY ===================== -->
+    <section class="section way" id="way">
+      <div class="kanji-bg" aria-hidden="true">道</div>
+      <header class="section__head reveal">
+        <span class="section__kanji">道</span>
+        <div>
+          <p class="section__num">三 / The Way</p>
+          <h2 class="section__title">Toni Lozanovski</h2>
+        </div>
+      </header>
+
+      <div class="way__grid">
+        <figure class="way__portrait reveal">
+          <div class="way__frame">
+            <img src="assets/img/tokyo-cub-press.jpg" alt="Toni Lozanovski, aka Tokyo Cub, standing on a railway platform at dusk">
+          </div>
+          <figcaption><span class="hanko" aria-hidden="true">子熊</span> Tokyo Cub, Naarm/Melbourne</figcaption>
+        </figure>
+
+        <div class="way__text">
+          <p class="way__lead reveal">Tokyo Cub is the solo project of producer <strong>Toni Lozanovski</strong> — shaping a distinct space within Australia’s evolving alt hip hop and dark-pop landscape.</p>
+          <p class="reveal">His work pairs atmospheric sound design with heavy rhythmic foundations, blending hip hop, electronica and experimental pop into something both contemporary and boldly his own. The tracks draw on personal experience and the wider cultural currents around it — built in the studio, but made for bodies in a room.</p>
+          <p class="reveal">Before Tokyo Cub, Toni spent years behind the decks and on the dancefloor — first as one half of <strong>The Noise</strong> alongside his brother Vas, and later as <strong>Drive</strong>. That club instinct never left: listen for the low end.</p>
+
+          <blockquote class="quote reveal">
+            <p>“This one is going to be soundtracking my summer for sure… Love the adlibs and the attitude. The mix is so tight on this one!”</p>
+            <cite>Alex Warren on <em>FIRE</em> — triple j Unearthed review</cite>
+          </blockquote>
+        </div>
+      </div>
+
+      <!-- Bushido strip -->
+      <div class="bushido reveal">
+        <div class="bushido__wave" aria-hidden="true"></div>
+        <div class="bushido__inner">
+          <span class="bushido__kanji" aria-hidden="true">武</span>
+          <div>
+            <h3 class="bushido__title">The dojo and the desk</h3>
+            <p>A lifelong martial artist, Toni carries the codes of the samurai and the art of Japanese tattooing into everything he makes. The discipline is the same on the mat as at the mixing desk: endless repetition, patience, and then the single decisive cut.</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="orbit reveal">
+        <p class="orbit__label">Sounds in the orbit of</p>
+        <div class="marquee" aria-label="Clipse, Kenny Beats, Denzel Curry, Timbaland, Pharrell, Kanye West, Smino, Oliver Sim, SBTRKT, Billy Lemos, Skrillex">
+          <div class="marquee__track" aria-hidden="true">
+            <span>Clipse</span><b>✕</b><span>Kenny Beats</span><b>✕</b><span>Denzel Curry</span><b>✕</b><span>Timbaland</span><b>✕</b><span>Pharrell</span><b>✕</b><span>Kanye West</span><b>✕</b><span>Smino</span><b>✕</b><span>Oliver Sim</span><b>✕</b><span>SBTRKT</span><b>✕</b><span>Billy Lemos</span><b>✕</b><span>Skrillex</span><b>✕</b>
+            <span>Clipse</span><b>✕</b><span>Kenny Beats</span><b>✕</b><span>Denzel Curry</span><b>✕</b><span>Timbaland</span><b>✕</b><span>Pharrell</span><b>✕</b><span>Kanye West</span><b>✕</b><span>Smino</span><b>✕</b><span>Oliver Sim</span><b>✕</b><span>SBTRKT</span><b>✕</b><span>Billy Lemos</span><b>✕</b><span>Skrillex</span><b>✕</b>
+          </div>
+        </div>
+        <p class="orbit__label">Collaborators</p>
+        <ul class="collabs">
+          <li>Lost Kid</li><li>Oliver Silo</li><li>Feelds</li><li>WE LOST TOKYO</li><li>LIFEOFTI</li><li>Laura Carville</li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- ===================== SENSEI ===================== -->
+    <section class="section sensei" id="sensei">
+      <div class="kanji-bg" aria-hidden="true">師</div>
+      <header class="section__head reveal">
+        <span class="section__kanji">師</span>
+        <div>
+          <p class="section__num">四 / Teaching</p>
+          <h2 class="section__title">Sensei</h2>
+        </div>
+      </header>
+
+      <div class="sensei__intro reveal">
+        <p class="sensei__role">Audio Lecturer · <a href="https://www.jmcacademy.edu.au/life-at-jmc/meet-the-team/toni-lozanovski/" target="_blank" rel="noopener">JMC Academy</a></p>
+        <p class="sensei__lead">The craft is only half-learned until it is passed on. As an Audio Lecturer at JMC Academy, Toni guides the next generation of engineers and producers — the same way the old masters taught: by doing, then by showing.</p>
+        <!-- TODO (Toni): add subjects taught, campus, years teaching, notable student outcomes. -->
+      </div>
+
+      <ol class="tenets">
+        <li class="tenet reveal">
+          <span class="tenet__kanji" aria-hidden="true">基本</span>
+          <h3>Kihon <small>Fundamentals</small></h3>
+          <p>Gain staging, signal flow, critical listening. The basics, drilled until they disappear into instinct.</p>
+        </li>
+        <li class="tenet reveal">
+          <span class="tenet__kanji" aria-hidden="true">稽古</span>
+          <h3>Keiko <small>Practice</small></h3>
+          <p>Session after session in the room. Real projects, real deadlines, real ears — skill earned through repetition.</p>
+        </li>
+        <li class="tenet reveal">
+          <span class="tenet__kanji" aria-hidden="true">残心</span>
+          <h3>Zanshin <small>Awareness</small></h3>
+          <p>Staying present after the last note. Knowing when a mix is finished — and when to put the sword down.</p>
+        </li>
+      </ol>
+    </section>
+
+    <!-- ===================== LINEAGE ===================== -->
+    <section class="section lineage" id="lineage">
+      <div class="kanji-bg" aria-hidden="true">系</div>
+      <header class="section__head reveal">
+        <span class="section__kanji">系</span>
+        <div>
+          <p class="section__num">五 / Lineage</p>
+          <h2 class="section__title">Names Worn Before</h2>
+        </div>
+      </header>
+
+      <ol class="timeline">
+        <li class="era reveal">
+          <span class="era__year">2009 —</span>
+          <div class="era__body">
+            <h3>THE NOISE</h3>
+            <p>A Melbourne DJ and production duo of brothers — Toni (ToneE) and Vas One. The mission: solid dancefloor fillers, built on signature driving basslines.</p>
+            <button class="textlink era__listen" id="sc-load">Open The Noise on SoundCloud <span aria-hidden="true">↓</span></button>
+            <div class="sc-embed" id="sc-embed" hidden></div>
+          </div>
+          <img class="era__img" src="assets/img/the-noise.jpg" alt="The Noise — Toni and Vas" loading="lazy">
+        </li>
+        <li class="era reveal">
+          <span class="era__year">Later</span>
+          <div class="era__body">
+            <h3>DRIVE</h3>
+            <p>Performing and collaborating as Drive — another chapter on the road from the club to the studio.</p>
+            <!-- TODO (Toni): years active, releases, notable shows for Drive. -->
+          </div>
+        </li>
+        <li class="era era--now reveal">
+          <span class="era__year">2024 —</span>
+          <div class="era__body">
+            <h3>TOKYO CUB</h3>
+            <p>Debut single <em>FIRE</em> with Lost Kid lands in October 2024. Since then: the <em>HTD</em> sessions, a run of records with Oliver Silo, <em>WASTED TIME</em> with Feelds and <em>MUNCHIES</em> with Lost Kid and WE LOST TOKYO.</p>
+          </div>
+          <img class="era__img" src="assets/img/fire.jpg" alt="FIRE cover art" loading="lazy">
+        </li>
+      </ol>
+    </section>
+
+    <!-- ===================== CONNECT ===================== -->
+    <section class="section connect" id="connect">
+      <header class="section__head reveal">
+        <span class="section__kanji">繋</span>
+        <div>
+          <p class="section__num">六 / Connect</p>
+          <h2 class="section__title">Follow the Sound</h2>
+        </div>
+      </header>
+      <ul class="links">
+        <li class="reveal"><a href="https://open.spotify.com/artist/7ps759iwP09Xb5Hks9glI4" target="_blank" rel="noopener"><span>Spotify</span><i>→</i></a></li>
+        <li class="reveal"><a href="https://www.youtube.com/@Tokyo_Cub" target="_blank" rel="noopener"><span>YouTube</span><i>→</i></a></li>
+        <li class="reveal"><a href="https://www.instagram.com/tokyocub/" target="_blank" rel="noopener"><span>Instagram</span><i>→</i></a></li>
+        <li class="reveal"><a href="https://www.abc.net.au/triplejunearthed/artist/tokyocub" target="_blank" rel="noopener"><span>triple j Unearthed</span><i>→</i></a></li>
+        <li class="reveal"><a href="https://amrap.org.au/artist/tokyo-cub-1" target="_blank" rel="noopener"><span>AMRAP</span><i>→</i></a></li>
+        <li class="reveal"><a href="https://soundcloud.com/the-noise-djs" target="_blank" rel="noopener"><span>SoundCloud <small>The Noise</small></span><i>→</i></a></li>
+      </ul>
+      <p class="connect__note reveal">Bookings, collaborations &amp; enquiries — message <a href="https://www.instagram.com/tokyocub/" target="_blank" rel="noopener">@tokyocub</a> on Instagram.</p>
+      <!-- TODO (Toni): add a booking / management email here. -->
+    </section>
+  </main>
+
+  <footer class="footer">
+    <div class="footer__wave" aria-hidden="true"></div>
+    <div class="footer__inner">
+      <span class="footer__mark">TOKYO CUB</span>
+      <span>© <span id="year">2026</span> Toni Lozanovski</span>
+      <span class="footer__jp" aria-hidden="true">東京子熊</span>
+    </div>
+  </footer>
+
+  <!-- ===================== DECK (persistent player) ===================== -->
+  <div class="deck" id="deck" aria-label="Audio player">
+    <canvas class="deck__spectrum" id="deck-spectrum" aria-hidden="true"></canvas>
+    <div class="deck__progress" id="deck-progress" role="slider" aria-label="Seek" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" tabindex="0">
+      <div class="deck__progress-fill" id="deck-progress-fill"></div>
+    </div>
+    <div class="deck__inner">
+      <img class="deck__art" id="deck-art" src="assets/img/munchies.jpg" alt="">
+      <div class="deck__meta">
+        <span class="deck__title" id="deck-title">MUNCHIES</span>
+        <span class="deck__artists" id="deck-artists">Tokyo Cub, Lost Kid &amp; WE LOST TOKYO</span>
+      </div>
+      <div class="deck__controls">
+        <button class="deck__btn" id="deck-prev" aria-label="Previous track">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6h2v12H6zm3.5 6 8.5 6V6z"/></svg>
+        </button>
+        <button class="deck__btn deck__btn--play" id="deck-play" aria-label="Play">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path class="i-play" d="M8 5v14l11-7z"/><path class="i-pause" d="M7 5h4v14H7zM13 5h4v14h-4z"/></svg>
+        </button>
+        <button class="deck__btn" id="deck-next" aria-label="Next track">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M16 6h2v12h-2zM6 18l8.5-6L6 6z"/></svg>
+        </button>
+      </div>
+      <div class="deck__right">
+        <span class="deck__time" id="deck-time">0:00</span>
+        <span class="badge badge--small" id="deck-badge">Full</span>
+        <button class="deck__btn deck__btn--mute" id="deck-mute" aria-label="Mute">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9v6h4l5 5V4L8 9z"/><path class="i-wave" d="M16 8.5a5 5 0 0 1 0 7M18.5 6a8.5 8.5 0 0 1 0 12" fill="none" stroke="currentColor" stroke-width="2"/></svg>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <div class="grain" aria-hidden="true"></div>
+
+  <script src="js/tracks.js"></script>
+  <script src="js/main.js"></script>
+</body>
+</html>
